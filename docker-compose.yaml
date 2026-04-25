@@ -1,0 +1,13 @@
+services:
+  mock:
+    image: stoplight/prism:4
+    command: 'mock -h 0.0.0.0 -p 8000 /tmp/openapi.json'
+    volumes:
+      - ./openapi.json:/tmp/openapi.json
+    ports:
+      - '8000:4010'
+  web:
+    image: simple-front
+    restart: always
+    ports:
+      - '80:80'
