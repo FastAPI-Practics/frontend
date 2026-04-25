@@ -1,13 +1,83 @@
+name: fastapi-compose-front
+
+x-back-image: &back-image lamarr3/simple-fastapi:front-lesson-3
+x-front-image: &front-image simple-front
+
+x-platform: &platform
+  platform: linux/x86_64
+
+x-base: &base
+  platform: linux/arm64
+  image: *back-image
+  env_file:
+    - .env
+  environment:
+    DB__HOST: db
+
+x-db-base: &db-base
+  <<: *platform
+  image: postgres:18
+  restart: always
+  env_file:
+    - .env
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+    interval: 10s
+    timeout: 5s
+    retries: 5
+    start_period: 10s
+
 services:
-  mock:
-    image: stoplight/prism:4
-    command: 'mock -h 0.0.0.0 -p 8000 /tmp/openapi.json'
-    volumes:
-      - ./openapi.json:/tmp/openapi.json
+  db:
+    <<: *db-base
     ports:
-      - '8000:4010'
+    - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DB__USER}
+      POSTGRES_PASSWORD: ${DB__PASSWORD}
+      POSTGRES_DB: ${DB__NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/18/docker
+
+  alembic:
+    <<: *base
+    restart: on-failure
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["alembic", "upgrade", "head"]
+  rbac:
+    <<: *base
+    restart: on-failure
+    depends_on:
+      alembic:
+        condition: service_completed_successfully
+    command: ["python3", "init.py"]
+  api:
+    <<: *base
+    depends_on:
+      rbac:
+        condition: service_completed_successfully
+    restart: always
+    ports:
+      - 8000:8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
   web:
-    image: simple-front
+    image: *front-image
     restart: always
     ports:
       - '80:80'
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  proxy_pgdata:
+  proxy_data:
+  certificates:
