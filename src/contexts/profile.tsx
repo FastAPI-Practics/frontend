@@ -28,7 +28,7 @@ export const ProfileContextProvider: FC<ProfileContextProviderProps> = (props) =
                 }
             });
             const { response, data } = resp;
-            if (response.status === 200){
+            if (response.status === 200 && data){
                 setUserInfo(data);
             } else if (response.status == 401) {
                 await refresh();

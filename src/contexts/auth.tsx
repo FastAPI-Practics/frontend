@@ -40,7 +40,7 @@ export const AuthContextProvider: FC<AuthContextProviderProps> = (props) => {
             body: loginData
         });
         const { response, data } = resp;
-        if (response.status == 200) {
+        if (response.status == 200 && data) {
             const { access_token } = data;
             setAccessToken(access_token);
             setTokenToStorage(access_token);
@@ -56,7 +56,7 @@ export const AuthContextProvider: FC<AuthContextProviderProps> = (props) => {
     const refresh = async () => {
         const resp = await refreshApiV1AuthRefreshPost({});
         const { response, data } = resp;
-        if (response.status == 200) {
+        if (response.status == 200 && data) {
             const { access_token } = data;
             setAccessToken(access_token);
             setTokenToStorage(access_token);
