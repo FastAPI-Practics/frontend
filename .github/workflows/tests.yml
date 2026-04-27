@@ -30,7 +30,7 @@ jobs:
     
     - name: Run tests
       run: |
-        cd src
+        cd app
         npx vitest --coverage.enabled true
 
     - name: 'Report Coverage'
