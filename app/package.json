@@ -17,6 +17,15 @@
     "react-dom": "^19.2.4",
     "react-router": "^7.14.0"
   },
+  "release": {
+    "branches": ["main", "ci-cd"],
+    "tagFormat": "v${version}-test-gh",
+    "plugins": [
+        "@semantic-release/commit-analyzer",
+        "@semantic-release/release-notes-generator",
+        "@semantic-release/github"
+    ]
+  },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "@hey-api/vite-plugin": "0.2.1",

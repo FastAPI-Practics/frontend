@@ -1,7 +1,7 @@
 name: fastapi-compose-front
 
 x-back-image: &back-image lamarr3/simple-fastapi:front-lesson-3
-x-front-image: &front-image simple-front
+x-front-image: &front-image lamarr3/simple-front
 
 x-platform: &platform
   platform: linux/x86_64
