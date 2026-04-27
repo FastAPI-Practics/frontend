@@ -18,7 +18,7 @@
     "react-router": "^7.14.0"
   },
   "release": {
-    "branches": ["main", "ci-cd"],
+    "branches": ["main", "deploy"],
     "tagFormat": "v${version}-test-gh",
     "plugins": [
         "@semantic-release/commit-analyzer",
