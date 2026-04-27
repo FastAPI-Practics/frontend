@@ -3,7 +3,7 @@
   become: true
   vars:
     env_path: "{{ lookup('env', 'ENV', default='../../src/.env') }}"
-    back_image: lamarr3/simple-fastapi:front-lesson-4
+    back_image: lamarr3/simple-fastapi:front-lesson-5
     front_image: "{{ lookup('env', 'DOCKER_IMAGE_WITH_TAG') }}"
     server_name: "{{ lookup('env', 'DOMAIN', default='localhost') }}"
     compose_path: ./compose.yaml
