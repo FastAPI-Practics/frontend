@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - ci-cd
+      - deploy
 
 permissions:
   contents: read
