@@ -50,7 +50,7 @@ runs:
     run: |
       cat > ansible/inventory.ini << EOF
       [vms]
-      ${{ inputs.vm_host }} ansible_host=${{ inputs.vm_user }}
+      ${{ inputs.vm_host }} ansible_user=${{ inputs.vm_user }}
       EOF
 
   - name: Get changed files
