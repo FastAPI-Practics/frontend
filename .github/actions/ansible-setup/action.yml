@@ -29,7 +29,7 @@ runs:
   
   - name: Install Ansible
     shell: bash
-    run: pipx install --include-deps ansible
+    run: pipx install --include-deps ansible ansible-lint
   
   - name: Install Ansible collections
     shell: bash

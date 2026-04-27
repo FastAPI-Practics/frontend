@@ -81,4 +81,3 @@ jobs:
       if: always()
       run: |
         rm -rf ~/.ssh/
-        rm ~/.env
