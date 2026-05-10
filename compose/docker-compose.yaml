@@ -1,18 +1,22 @@
 name: fastapi-compose-front
 
-x-back-image: &back-image lamarr3/simple-fastapi:front-lesson-3
-x-front-image: &front-image simple-front
+x-back-image: &back-image lamarr3/simple-fastapi:front-lesson-5
+x-front-image: &front-image lamarr3/nginx-front:v2
 
 x-platform: &platform
   platform: linux/x86_64
 
-x-base: &base
-  platform: linux/arm64
+x-back: &back
+  platform: linux/amd64
   image: *back-image
   env_file:
     - .env
   environment:
     DB__HOST: db
+
+x-back-service: &back-service
+  <<: *back
+  restart: on-failure
 
 x-db-base: &db-base
   <<: *platform
@@ -27,6 +31,7 @@ x-db-base: &db-base
     retries: 5
     start_period: 10s
 
+
 services:
   db:
     <<: *db-base
@@ -40,21 +45,19 @@ services:
       - pgdata:/var/lib/postgresql/18/docker
 
   alembic:
-    <<: *base
-    restart: on-failure
+    <<: *back-service
     depends_on:
       db:
         condition: service_healthy
     command: ["alembic", "upgrade", "head"]
   rbac:
-    <<: *base
-    restart: on-failure
+    <<: *back-service
     depends_on:
       alembic:
         condition: service_completed_successfully
     command: ["python3", "init.py"]
   api:
-    <<: *base
+    <<: *back
     depends_on:
       rbac:
         condition: service_completed_successfully
@@ -78,6 +81,3 @@ services:
 
 volumes:
   pgdata:
-  proxy_pgdata:
-  proxy_data:
-  certificates:
