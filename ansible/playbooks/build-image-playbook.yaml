@@ -1,0 +1,42 @@
+- name: Docker image build
+  hosts: vms
+  become: true
+  vars:
+    image_name: lamarr3/nginx-front
+    image_tag: v8-test
+    docker_pass: "{{ lookup('env', 'DOCKER_TOKEN') }}"
+    source_path: ./app
+  tasks:
+    - name: Copy source code
+      ansible.posix.synchronize:
+        src: ../../app/
+        dest: "{{ source_path }}"
+        rsync_opts:
+          - "--exclude=node_modules"
+          - "--exclude=dist"
+
+    - name: Build image
+      community.docker.docker_image_build:
+        name: "{{ image_name }}"
+        tag: "{{ image_tag }}"
+        path: "{{ source_path }}"
+
+    - name: Remove source code
+      ansible.builtin.file:
+        path: "{{ source_path }}"
+        state: absent
+
+    - name: Login to registry
+      community.docker.docker_login:
+        username: lamarr3
+        password: "{{ docker_pass }}"
+        reauthorize: true
+
+    - name: Push image
+      community.docker.docker_image_push:
+        name: "{{ image_name }}"
+        tag: "{{ image_tag }}"
+
+    - name: Prune docker build cache
+      community.docker.docker_prune:
+        builder_cache: true

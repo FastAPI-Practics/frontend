@@ -1,7 +1,7 @@
 name: fastapi-compose-front
 
-x-back-image: &back-image lamarr3/simple-fastapi:front-lesson-10
-x-front-image: &front-image lamarr3/nginx-front:v7-test
+x-back-image: &back-image {{ back_image }}
+x-front-image: &front-image {{ front_image }}
 
 x-platform: &platform
   platform: linux/x86_64
@@ -72,7 +72,6 @@ services:
       start_period: 10s
   web:
     image: *front-image
-    platform: linux/amd64
     restart: always
     ports:
       - '80:80'

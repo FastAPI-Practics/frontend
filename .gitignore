@@ -26,3 +26,5 @@ coverage
 junit-report.xml
 
 .env
+inventory.ini
+.ansible
