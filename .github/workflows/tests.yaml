@@ -1,0 +1,38 @@
+name: Testing workflow
+
+on:
+  pull_request:
+    branches:
+      - main
+    types: 
+      - opened
+      - synchronize
+
+permissions:
+  pull-requests: write
+  contents: write
+    
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+      - name: Install deps
+        run: |
+          cd ./app
+          echo "Install deps"
+          npm i
+      - name: Run tests
+        run: |
+          cd ./app
+          npx vitest --coverage.enabled true
+      - name: Report coverage
+        if: always()
+        uses: davelosert/vitest-coverage-report@v2
+        with:
+          working_directory: ./app
