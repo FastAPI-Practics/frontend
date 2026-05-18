@@ -33,6 +33,6 @@ jobs:
           npx vitest --coverage.enabled true
       - name: Report coverage
         if: always()
-        uses: davelosert/vitest-coverage-report@v2
+        uses: davelosert/vitest-coverage-report-action@v2
         with:
           working_directory: ./app
