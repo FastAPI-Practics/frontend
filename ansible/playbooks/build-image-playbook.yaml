@@ -2,8 +2,9 @@
   hosts: vms
   become: true
   vars:
-    image_name: lamarr3/nginx-front
-    image_tag: v8-test
+    docker_user: "{{ lookup('env', 'DOCKER_USER') }}"
+    image_name: "{{ docker_user }}/{{ lookup('env', 'DOCKER_IMAGE_NAME') }}"
+    image_tag: "{{ lookup('env', 'CI_COMMIT_TAG') }}"
     docker_pass: "{{ lookup('env', 'DOCKER_TOKEN') }}"
     source_path: ./app
   tasks:
@@ -28,7 +29,7 @@
 
     - name: Login to registry
       community.docker.docker_login:
-        username: lamarr3
+        username: "{{ docker_user }}"
         password: "{{ docker_pass }}"
         reauthorize: true
 
