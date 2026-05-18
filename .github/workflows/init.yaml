@@ -1,0 +1,27 @@
+name: VM init workflow
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  init:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: FastAPI-Practics/frontend/.github/actions/ansible-setup@ci-cd-2
+        with:
+          ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY_B64 }}
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+          vm_host: ${{ secrets.VM_HOST }}
+          vm_user: ${{ secrets.VM_USER }}
+
+      - name: Run build playbook
+        run: |
+          cd ansible
+          ansible-playbook \
+            -i inventory.ini \
+            playbooks/init-playbook.yaml
+        env:
+          ANSIBLE_HOST_KEY_CHECKING: "false"
+          ANSIBLE_FORCE_COLOR: "true"
