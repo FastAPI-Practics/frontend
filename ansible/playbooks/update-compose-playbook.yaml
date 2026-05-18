@@ -4,7 +4,10 @@
   vars:
     env_path: "{{ lookup('env', 'ENV', default='../../compose/.env') }}"
     back_image: lamarr3/simple-fastapi:front-lesson-10
-    front_image: lamarr3/nginx-front:v8-test
+    docker_user: "{{ lookup('env', 'DOCKER_USER') }}"
+    image_name: "{{ docker_user }}/{{ lookup('env', 'DOCKER_IMAGE_NAME') }}"
+    image_tag: "{{ lookup('env', 'CI_COMMIT_TAG') }}"
+    front_image: "{{ image_name }}:{{ image_tag }}"
     compose_path: ./compose.yaml
   tasks:
     - name: Copy .env
