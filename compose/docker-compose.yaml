@@ -35,8 +35,6 @@ x-db-base: &db-base
 services:
   db:
     <<: *db-base
-    ports:
-    - "5432:5432"
     environment:
       POSTGRES_USER: ${DB__USER}
       POSTGRES_PASSWORD: ${DB__PASSWORD}
@@ -74,11 +72,41 @@ services:
     image: *front-image
     platform: linux/amd64
     restart: always
-    ports:
-      - '80:80'
     depends_on:
       api:
         condition: service_healthy
+  db_proxy:
+    <<: *db-base
+    environment:
+      POSTGRES_USER: ${DB__USER}
+      POSTGRES_PASSWORD: ${DB__PASSWORD}
+      POSTGRES_DB: proxy
+    volumes:
+      - proxy_pgdata:/var/lib/postgresql/18/docker
+  proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: always
+    ports:
+      - '80:80'
+      - '443:443'
+      - '81:81'
+    env_file:
+      - .env
+    environment:
+      TZ: 'Russia/Moscow'
+      DB_POSTGRES_HOST: 'db_proxy'
+      DB_POSTGRES_PORT: 5432
+      DB_POSTGRES_USER: ${DB__USER}
+      DB_POSTGRES_PASSWORD: ${DB__PASSWORD}
+      DB_POSTGRES_NAME: proxy
+      INITIAL_ADMIN_EMAIL: ${PROXY__ADMIN_EMAIL}
+      INITIAL_ADMIN_PASSWORD: ${PROXY__ADMIN_PASSWORD}
+    volumes:
+      - proxy_data:/data
+      - certificates:/etc/letsencrypt
 
 volumes:
   pgdata:
+  proxy_pgdata:
+  proxy_data:
+  certificates:
