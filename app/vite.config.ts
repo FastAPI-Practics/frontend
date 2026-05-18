@@ -1,0 +1,23 @@
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vitest/config';
+
+// https://vite.dev/config/
+export default defineConfig({
+  plugins: [
+    react(),
+  ],
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    reporters: ['default', 'junit'],
+    outputFile: {
+      junit: './junit-report.xml',
+    },
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'json-summary', 'cobertura'],
+      reportOnFailure: true,
+      reportsDirectory: './coverage'
+    },
+  }
+})

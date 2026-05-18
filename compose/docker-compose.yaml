@@ -1,0 +1,112 @@
+name: fastapi-compose-front
+
+x-back-image: &back-image lamarr3/simple-fastapi:front-lesson-10
+x-front-image: &front-image lamarr3/nginx-front:v7-test
+
+x-platform: &platform
+  platform: linux/x86_64
+
+x-back: &back
+  platform: linux/amd64
+  image: *back-image
+  env_file:
+    - .env
+  environment:
+    DB__HOST: db
+
+x-back-service: &back-service
+  <<: *back
+  restart: on-failure
+
+x-db-base: &db-base
+  <<: *platform
+  image: postgres:18
+  restart: always
+  env_file:
+    - .env
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+    interval: 10s
+    timeout: 5s
+    retries: 5
+    start_period: 10s
+
+
+services:
+  db:
+    <<: *db-base
+    environment:
+      POSTGRES_USER: ${DB__USER}
+      POSTGRES_PASSWORD: ${DB__PASSWORD}
+      POSTGRES_DB: ${DB__NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/18/docker
+
+  alembic:
+    <<: *back-service
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["alembic", "upgrade", "head"]
+  rbac:
+    <<: *back-service
+    depends_on:
+      alembic:
+        condition: service_completed_successfully
+    command: ["python3", "init.py"]
+  api:
+    <<: *back
+    depends_on:
+      rbac:
+        condition: service_completed_successfully
+    restart: always
+    ports:
+      - 8000:8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+  web:
+    image: *front-image
+    platform: linux/amd64
+    restart: always
+    depends_on:
+      api:
+        condition: service_healthy
+  db_proxy:
+    <<: *db-base
+    environment:
+      POSTGRES_USER: ${DB__USER}
+      POSTGRES_PASSWORD: ${DB__PASSWORD}
+      POSTGRES_DB: proxy
+    volumes:
+      - proxy_pgdata:/var/lib/postgresql/18/docker
+  proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: always
+    ports:
+      - '80:80'
+      - '443:443'
+      - '81:81'
+    env_file:
+      - .env
+    environment:
+      TZ: 'Russia/Moscow'
+      DB_POSTGRES_HOST: 'db_proxy'
+      DB_POSTGRES_PORT: 5432
+      DB_POSTGRES_USER: ${DB__USER}
+      DB_POSTGRES_PASSWORD: ${DB__PASSWORD}
+      DB_POSTGRES_NAME: proxy
+      INITIAL_ADMIN_EMAIL: ${PROXY__ADMIN_EMAIL}
+      INITIAL_ADMIN_PASSWORD: ${PROXY__ADMIN_PASSWORD}
+    volumes:
+      - proxy_data:/data
+      - certificates:/etc/letsencrypt
+
+volumes:
+  pgdata:
+  proxy_pgdata:
+  proxy_data:
+  certificates:
