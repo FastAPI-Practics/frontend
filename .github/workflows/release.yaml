@@ -74,6 +74,8 @@ jobs:
           DOCKER_IMAGE_NAME: ${{ vars.DOCKER_IMAGE_NAME }}
           CI_COMMIT_TAG: ${{ needs.release.outputs.new_release }}-gh-front-lesson
           DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+      - name: Copy .env
+        run: echo "${{ secrets.ENV }}" > ~/.env
       - name: Run compose update playbook
         run: |
           cd ansible
